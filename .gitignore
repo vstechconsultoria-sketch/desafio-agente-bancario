@@ -1,0 +1,26 @@
+# Ambiente
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Segredos
+.env
+
+# Dados gerados em runtime (a base de clientes e a tabela de score são versionadas)
+data/solicitacoes_aumento_limite.csv
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Logs
+logs/
+*.log

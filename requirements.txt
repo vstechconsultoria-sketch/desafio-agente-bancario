@@ -1,0 +1,19 @@
+# --- Orquestração de agentes ---
+langgraph>=0.3.0,<0.6.0
+langchain-core>=0.3.0
+
+# --- Provedores de LLM (o padrão é Groq; os demais são opcionais) ---
+langchain-groq>=0.2.0
+langchain-google-genai>=2.0.0
+langchain-openai>=0.2.0
+
+# --- Interface ---
+streamlit>=1.36.0
+
+# --- Manipulação de dados e utilidades ---
+pandas>=2.2.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# --- Testes ---
+pytest>=8.0.0

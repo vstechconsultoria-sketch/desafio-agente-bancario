@@ -1,0 +1,4 @@
+# Normaliza fim de linha em todo o repositório (evita ruído entre Windows/Linux)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
