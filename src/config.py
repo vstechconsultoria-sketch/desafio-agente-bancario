@@ -25,7 +25,9 @@ LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.2") or "0.2")
 
 # Modelos padrão por provedor (usados quando LLM_MODEL não é informado).
 DEFAULT_MODELS = {
-    "groq": "llama-3.3-70b-versatile",
+    # qwen3-32b lida muito bem com tool-calling e tem uma cota diária generosa
+    # na camada gratuita da Groq (o llama-3.3-70b é ótimo, mas satura rápido).
+    "groq": "qwen/qwen3-32b",
     "google": "gemini-2.0-flash",
     "openai": "gpt-4o-mini",
 }
