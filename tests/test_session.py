@@ -1,5 +1,5 @@
-"""Testes do sanitizador de saída (remoção de sintaxe de ferramenta vazada)."""
-from src.session import _limpar_texto
+"""Testes do sanitizador de saída e das mensagens amigáveis de erro."""
+from src.session import _limpar_texto, _mensagem_amigavel_erro
 
 
 def test_remove_function_tag_fechada():
@@ -24,3 +24,25 @@ def test_texto_normal_intacto():
 
 def test_texto_vazio():
     assert _limpar_texto("") == ""
+
+
+# --- Mensagens amigáveis de erro -------------------------------------------
+def test_mensagem_rate_limit():
+    class RateLimitError(Exception):
+        pass
+
+    msg = _mensagem_amigavel_erro(RateLimitError("Error code: 429 rate_limit_exceeded"))
+    assert "limite de uso" in msg.lower()
+
+
+def test_mensagem_recursion():
+    class GraphRecursionError(Exception):
+        pass
+
+    msg = _mensagem_amigavel_erro(GraphRecursionError("Recursion limit of 20 reached"))
+    assert "reformular" in msg.lower()
+
+
+def test_mensagem_generica():
+    msg = _mensagem_amigavel_erro(ValueError("algo inesperado"))
+    assert "instabilidade" in msg.lower()

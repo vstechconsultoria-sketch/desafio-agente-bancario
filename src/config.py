@@ -38,6 +38,12 @@ EXCHANGE_API_URL = os.getenv(
 # --- Regras de negócio ------------------------------------------------------
 MAX_AUTH_ATTEMPTS = 3  # 1 tentativa inicial + 2 novas tentativas
 
+# Limite de passos internos por turno do grafo. Dá folga para fluxos legítimos
+# (autenticar -> transferir -> consultar -> responder, ~7-8 passos) mas corta
+# cedo eventuais loops de transferência entre agentes, protegendo o orçamento
+# de tokens do provedor.
+RECURSION_LIMIT = 20
+
 
 # --- Logging ----------------------------------------------------------------
 def _build_logger() -> logging.Logger:

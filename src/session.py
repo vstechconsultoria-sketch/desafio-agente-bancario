@@ -10,6 +10,7 @@ from functools import lru_cache
 
 from langchain_core.messages import AIMessage, HumanMessage
 
+from src import config as config_mod
 from src.config import logger
 from src.graph import build_graph
 
@@ -42,7 +43,30 @@ def get_graph():
 
 
 def _config(thread_id: str) -> dict:
-    return {"configurable": {"thread_id": thread_id}}
+    return {
+        "configurable": {"thread_id": thread_id},
+        "recursion_limit": config_mod.RECURSION_LIMIT,
+    }
+
+
+def _mensagem_amigavel_erro(exc: Exception) -> str:
+    """Traduz uma exceção técnica numa mensagem cordial ao cliente."""
+    texto = f"{type(exc).__name__} {exc}".lower()
+
+    if "rate_limit" in texto or "429" in texto or "ratelimit" in texto:
+        return (
+            "Nosso atendimento inteligente atingiu o limite de uso do momento. "
+            "Por favor, tente novamente em alguns minutos — agradeço a paciência."
+        )
+    if "recursion" in texto:
+        return (
+            "Tive um pouco de dificuldade para concluir esse pedido. "
+            "Pode reformular de forma mais direta, por favor?"
+        )
+    return (
+        "Desculpe, tive uma instabilidade no atendimento agora. "
+        "Pode tentar novamente em instantes?"
+    )
 
 
 def enviar_mensagem(thread_id: str, texto: str) -> dict:
@@ -58,10 +82,7 @@ def enviar_mensagem(thread_id: str, texto: str) -> dict:
     except Exception as exc:  # falha inesperada do LLM/infra
         logger.exception("Falha ao processar turno da conversa")
         return {
-            "resposta": (
-                "Desculpe, tive uma instabilidade no atendimento agora. "
-                "Pode tentar novamente em instantes?"
-            ),
+            "resposta": _mensagem_amigavel_erro(exc),
             "encerrado": False,
             "erro": str(exc),
         }
