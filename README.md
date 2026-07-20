@@ -259,9 +259,14 @@ GROQ_API_KEY=sua_chave_aqui
 Para usar Gemini: `LLM_PROVIDER=google` e `GOOGLE_API_KEY`.
 Para usar OpenAI: `LLM_PROVIDER=openai` e `OPENAI_API_KEY`.
 
-Observação sobre a camada gratuita do Groq: o modelo padrão (70b) tem um limite
-diário de tokens relativamente baixo. Se ele se esgotar durante os testes, defina
-`LLM_MODEL=llama-3.1-8b-instant`, que tem cota bem maior.
+Observação sobre a camada gratuita do Groq: o modelo padrão é o
+`llama-3.3-70b-versatile`, escolhido pelo bom tool-calling, resposta limpa e um
+teto de tokens por minuto (TPM) folgado — o que reduz o risco de atingir o limite
+de uso durante uma demonstração ao vivo. Se você fizer muitos ensaios e esbarrar
+no limite **diário**, uma alternativa com cota diária maior é
+`LLM_MODEL=qwen/qwen3.6-27b` (o raciocínio interno dele é ocultado
+automaticamente). A camada de LLM já reenvia a requisição algumas vezes em caso
+de 429 transitório, absorvendo os picos de TPM sem expor erro ao cliente.
 
 ### 3) Executar a interface
 
@@ -291,12 +296,19 @@ contrário, são ignorados.
 ### Roteiro de demonstração sugerido
 
 1. Autentique-se como Bruno (`555.666.777-88`, 02/11/1985), score 400.
-2. Peça para ver o limite e, em seguida, um aumento para R$ 8.000. A solicitação
-   é rejeitada e a entrevista é oferecida.
-3. Aceite a entrevista e informe uma renda alta e emprego formal. O score é
-   recalculado e você volta ao crédito.
-4. Peça o aumento novamente; agora pode ser aprovado.
+2. Peça para ver o limite e, em seguida, um aumento para R$ 8.000. Com o score
+   400 (teto de R$ 3.000), a solicitação é rejeitada e a entrevista é oferecida.
+3. Aceite a entrevista e responda: renda **R$ 12.000**, emprego **formal**,
+   despesas fixas **R$ 1.000**, **0** dependentes, **sem** dívidas. Esses valores
+   elevam o score para ~860 (teto de R$ 30.000). O cliente volta ao crédito
+   automaticamente.
+4. O agente refaz a análise do pedido de R$ 8.000 e agora **aprova**.
 5. Consulte a cotação do dólar e depois diga "pode encerrar".
+
+> Os números da entrevista acima são calibrados para uma aprovação limpa ao
+> vivo. Se quiser mostrar o caminho de rejeição persistente, mantenha uma renda
+> baixa ou despesas altas: o score sobe pouco e o pedido de R$ 8.000 continua
+> acima do teto da faixa.
 
 ## Estrutura do Código
 
