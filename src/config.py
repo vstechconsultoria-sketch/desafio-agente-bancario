@@ -25,9 +25,12 @@ LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", "0.2") or "0.2")
 
 # Modelos padrão por provedor (usados quando LLM_MODEL não é informado).
 DEFAULT_MODELS = {
-    # qwen3-32b lida muito bem com tool-calling e tem uma cota diária generosa
-    # na camada gratuita da Groq (o llama-3.3-70b é ótimo, mas satura rápido).
-    "groq": "qwen/qwen3-32b",
+    # llama-3.3-70b: excelente tool-calling, resposta limpa e um teto de tokens
+    # por minuto (TPM) mais folgado na camada gratuita da Groq — o que reduz o
+    # risco de rate-limit durante uma demonstração ao vivo. Alternativa com cota
+    # DIÁRIA maior (para muitos testes): qwen/qwen3.6-27b (a fábrica de LLM já
+    # oculta o raciocínio interno dele via reasoning_format="hidden").
+    "groq": "llama-3.3-70b-versatile",
     "google": "gemini-2.0-flash",
     "openai": "gpt-4o-mini",
 }

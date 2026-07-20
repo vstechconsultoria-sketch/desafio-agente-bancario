@@ -40,7 +40,23 @@ def get_llm():
                 raise LLMConfigError(
                     "GROQ_API_KEY não configurada. Defina-a no arquivo .env."
                 )
-            return ChatGroq(model=model, temperature=temperature)
+            extra = {}
+            # Modelos qwen3 raciocinam em voz alta e, sem isso, despejam blocos
+            # <think> no conteúdo — inaceitável no chat visto pelo cliente.
+            # "hidden" mantém o raciocínio interno e devolve só a resposta final.
+            if model.startswith("qwen"):
+                extra["reasoning_format"] = "hidden"
+            # A camada gratuita da Groq tem um teto de tokens por minuto baixo.
+            # Em turnos longos do multi-agente ele pode ser tocado; o cliente
+            # devolve o cabeçalho "retry-after" (~poucos segundos), então
+            # aumentamos as retentativas para absorver o 429 de forma invisível
+            # em vez de expor uma falha ao cliente no meio da conversa.
+            return ChatGroq(
+                model=model,
+                temperature=temperature,
+                max_retries=6,
+                **extra,
+            )
 
         if provider == "google":
             from langchain_google_genai import ChatGoogleGenerativeAI

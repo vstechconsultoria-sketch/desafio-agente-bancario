@@ -8,6 +8,12 @@ import os
 import uuid
 
 import pytest
+from dotenv import load_dotenv
+
+# Carrega o .env aqui também: rodado isoladamente (pytest tests/test_integration.py),
+# nenhum outro módulo dispara o load_dotenv de src.config antes desta verificação,
+# o que faria o teste pular mesmo com a chave presente no .env.
+load_dotenv()
 
 _TEM_CHAVE = any(
     os.getenv(k)
