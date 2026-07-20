@@ -26,11 +26,23 @@ pytestmark = pytest.mark.skipif(
 )
 
 
+def _pular_se_sem_cota(resultado):
+    """Um rate-limit do provedor é condição de ambiente, não defeito de código.
+
+    Nesses casos pulamos o teste em vez de falhar, para a suíte não ficar
+    vermelha só porque a cota (por minuto ou diária) da camada gratuita acabou.
+    """
+    erro = (resultado.get("erro") or "").lower()
+    if "429" in erro or "rate_limit" in erro or "rate limit" in erro:
+        pytest.skip("Provedor de LLM sem cota (rate limit) no momento; fluxo real pulado.")
+
+
 def test_saudacao_inicial_gera_resposta():
     from src.session import enviar_mensagem
 
     thread = uuid.uuid4().hex
     resultado = enviar_mensagem(thread, "Olá! Vim ao atendimento.")
+    _pular_se_sem_cota(resultado)
     assert isinstance(resultado["resposta"], str)
     assert resultado["resposta"].strip() != ""
     assert resultado["erro"] is None
@@ -41,10 +53,14 @@ def test_fluxo_autenticacao_valida():
     from src.session import enviar_mensagem
 
     thread = uuid.uuid4().hex
-    enviar_mensagem(thread, "Olá, quero consultar meu limite de crédito.")
-    enviar_mensagem(thread, "Meu CPF é 111.222.333-44")
-    resultado = enviar_mensagem(thread, "Nasci em 15/05/1990")
+    for msg in (
+        "Olá, quero consultar meu limite de crédito.",
+        "Meu CPF é 111.222.333-44",
+        "Nasci em 15/05/1990",
+    ):
+        _pular_se_sem_cota(enviar_mensagem(thread, msg))
     # Após autenticar, ao pedir o limite, a resposta deve mencionar valor/limite.
     resultado = enviar_mensagem(thread, "Qual é o meu limite disponível?")
+    _pular_se_sem_cota(resultado)
     assert resultado["erro"] is None
     assert "5.000" in resultado["resposta"] or "limite" in resultado["resposta"].lower()
