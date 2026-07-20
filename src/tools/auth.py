@@ -13,6 +13,7 @@ from src.data_manager import (
     DataAccessError,
     autenticar_cliente,
     normalizar_cpf,
+    normalizar_data,
 )
 
 
@@ -29,10 +30,42 @@ def autenticar_cliente_tool(
     A data pode vir como DD/MM/AAAA ou AAAA-MM-DD.
     Retorna o resultado da autenticação e controla o número de tentativas.
     """
+    cpf_limpo = str(cpf or "").strip()
+    data_limpa = str(data_nascimento or "").strip()
+
+    # Blindagem: não consome uma tentativa quando falta um dado essencial. O
+    # modelo pode chamar a ferramenta cedo demais (por exemplo, só com o CPF) ou
+    # a data pode vir num formato irreconhecível. Nesses casos pedimos o dado de
+    # novo, sem penalizar o cliente com uma das (poucas) tentativas de autenticação.
+    if not cpf_limpo or not data_limpa or normalizar_data(data_limpa) is None:
+        if not cpf_limpo and not data_limpa:
+            faltando = "o CPF e a data de nascimento"
+        elif not cpf_limpo:
+            faltando = "o CPF"
+        elif not data_limpa:
+            faltando = "a data de nascimento (dd/mm/aaaa)"
+        else:  # data presente, porém em formato não reconhecido
+            faltando = "a data de nascimento num formato válido (dd/mm/aaaa)"
+        return Command(
+            update={
+                "messages": [
+                    ToolMessage(
+                        content=(
+                            f"DADOS_INCOMPLETOS: ainda falta {faltando}. Peça esse "
+                            "dado ao cliente de forma cordial. Isto NÃO conta como "
+                            "tentativa de autenticação."
+                        ),
+                        tool_call_id=tool_call_id,
+                        name="autenticar_cliente",
+                    )
+                ]
+            }
+        )
+
     tentativas = int(state.get("auth_attempts", 0)) + 1
 
     try:
-        cliente = autenticar_cliente(cpf, data_nascimento)
+        cliente = autenticar_cliente(cpf_limpo, data_limpa)
     except DataAccessError as exc:
         return Command(
             update={
