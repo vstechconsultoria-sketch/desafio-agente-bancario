@@ -318,6 +318,8 @@ contrário, são ignorados.
 ├── cli.py                     # Interface de linha de comando (teste)
 ├── requirements.txt
 ├── .env.example               # Modelo de variáveis de ambiente
+├── docs/
+│   └── APRESENTACAO.md        # Playbook de apresentação (roteiro, conformidade)
 ├── data/
 │   ├── clientes.csv           # Base de clientes (CPF, nascimento, limite, score)
 │   ├── score_limite.csv       # Política: faixa de score -> limite máximo
@@ -342,6 +344,8 @@ contrário, são ignorados.
 └── tests/
     ├── test_domain.py         # Score e política de limites
     ├── test_data_manager.py   # Autenticação e escrita em CSV
+    ├── test_auth_tool.py      # Ferramenta de autenticação (regra das 3 tentativas)
+    ├── test_exchange.py       # Câmbio: cotação e tratamento de erros (API mockada)
     ├── test_session.py        # Sanitização de saída e mensagens de erro
     └── test_integration.py    # Fluxo ponta a ponta (requer chave; senão, ignorado)
 ```
